@@ -1,0 +1,64 @@
+# To execute this docker compose yml file use `docker compose -f docker-compose-v3.yml up`
+# Add the `-d` flag at the end for detached execution
+# To stop the execution, hit Ctrl+C, and then `docker compose -f docker-compose-v3.yml down`
+services:
+  selenium-hub:
+    image: selenium/hub:latest
+    container_name: selenium-hub
+    ports:
+      - 4444:4444
+
+  chrome:
+    image: selenium/node-chromium:latest
+    platform: linux/arm64
+    shm_size: 2gb #shared memory size
+    depends_on:
+      - selenium-hub
+    # deploy:
+    #   replicas: 4    
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=4
+
+  firefox:
+    image: selenium/node-firefox:latest
+    platform: linux/arm64
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    # deploy:
+    #   replicas: 0 
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_NODE_MAX_SESSIONS=4
+
+  vendor-portal:
+    image: kumarlokesh57/selenium
+    depends_on:
+      - chrome
+    environment:
+      - BROWSER=chrome
+      - HUB_HOST=selenium-hub
+      - THREAD_COUNT=3
+      - TEST_SUITE=vendor-portal.xml
+    volumes:
+      - ./output/vendor-portal:/home/selenium-docker/test-output
+
+
+  flight-reservation:
+    image: kumarlokesh57/selenium
+    depends_on:
+      - firefox
+    environment:
+      - BROWSER=firefox
+      - HUB_HOST=selenium-hub
+      - THREAD_COUNT=3
+      - TEST_SUITE=flight-reservation.xml
+    volumes:
+      - ./output/flight-reservation:/home/selenium-docker/test-output
