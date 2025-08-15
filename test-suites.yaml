@@ -5,7 +5,7 @@ services:
   vendor-portal:
     image: kumarlokesh57/selenium
     environment:
-      - BROWSER=chrome
+      - BROWSER
       - HUB_HOST=selenium-hub
       - THREAD_COUNT=3
       - TEST_SUITE=vendor-portal.xml
@@ -15,9 +15,9 @@ services:
   flight-reservation:
     image: kumarlokesh57/selenium
     environment:
-      - BROWSER=firefox
+      - BROWSER
       - HUB_HOST=selenium-hub
-      - THREAD_COUNT=3
+      - THREAD_COUNT=4
       - TEST_SUITE=flight-reservation.xml
     volumes:
       - ./output/flight-reservation:/home/selenium-docker/test-output
